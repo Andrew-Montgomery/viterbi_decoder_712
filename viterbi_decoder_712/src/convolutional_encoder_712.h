@@ -59,6 +59,7 @@ public:
     // Updating the puncture pattern resets the encoder.
     void SetPuncturePattern(const BitVector &newPattern);
     // Main encode routine. Returns punctured bit vector.
+    // Encoded length (inputSize*2) must be a multiple of the puncture pattern size.
     BitVector Encode(const BitVector &input);
     // Resets the internal running state of the encoder.
     void Reset();
