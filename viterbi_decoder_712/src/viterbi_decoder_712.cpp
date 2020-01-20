@@ -34,6 +34,7 @@ ViterbiDecoder712H::ViterbiDecoder712H()
 
 void ViterbiDecoder712H::SetTracebackDepth(uint32_t depth)
 {
+    assert(depth > 0);
     tracebackDepth = depth;
     Reset();
 }
@@ -46,6 +47,11 @@ uint32_t ViterbiDecoder712H::GetTracebackDepth() const
 void ViterbiDecoder712H::SetPuncturePattern(const BitVector &pattern)
 {
     puncturePattern = pattern;
+
+    if(puncturePattern.Size() == 0) {
+        puncturePattern = PuncturePattern712_12;
+    }
+
     Reset();
 }
 
@@ -79,10 +85,10 @@ BitVector ViterbiDecoder712H::Decode(const BitVector &input)
         }
     }
 
-    assert((depunctured.Length() % n) == 0);
+    assert((depunctured.Length() % N) == 0);
 
     // How many input decoded bits are in the message
-    int iters = depunctured.Size() / n;
+    int iters = depunctured.Size() / N;
 
     BitVector decoded;
     decoded.Resize(iters);
@@ -160,7 +166,7 @@ BitVector ViterbiDecoder712H::Decode(const BitVector &input)
         currMetric = tmp;
 
         // Advance input
-        s += n;
+        s += N;
         // Advance puncture pattern index
         punctureIndex += 2;
         if(punctureIndex >= puncturePattern.Size()) {
@@ -182,7 +188,7 @@ BitVector ViterbiDecoder712H::DecodeTerminated(const BitVector &input)
     BitVector decoded = Decode(input);
 
     // Append enough zeros to satisfy the puncture pattern ratio and flush the full traceback.
-    int zerosToPad = ceil((double)(tracebackDepth * n) / puncturePattern.Ones())
+    int zerosToPad = ceil((double)(tracebackDepth * N) / puncturePattern.Ones())
             * puncturePattern.Ones();
 
     BitVector tail(zerosToPad);
@@ -201,27 +207,6 @@ uint8_t ViterbiDecoder712H::HD(const uint8_t a[2], const uint8_t b[2], const uin
     return ((a[0] ^ b[0]) & p[0]) + ((a[1] ^ b[1]) & p[1]);
 }
 
-BitVector ViterbiDecoder712H::Depuncture(const BitVector &input)
-{
-    BitVector output;
-
-    for(int i = 0; i < input.Size();) {
-        if(puncturePattern[depunctureIndex] == 0) {
-            output.PushBack(0);
-        } else {
-            output.PushBack(input[i]);
-            i++;
-        }
-
-        depunctureIndex++;
-        if(depunctureIndex >= puncturePattern.Size()) {
-            depunctureIndex = 0;
-        }
-    }
-
-    return output;
-}
-
 void ViterbiDecoder712H::Reset()
 {
     // Need tracebackDepth+1 to ensure we have tracebackDepth previous states
@@ -236,24 +221,20 @@ void ViterbiDecoder712H::Reset()
         }
     }
 
-    // Force decode to always start at state 0
-    decisions[0][0] = 0;
-
     decisionPos = 1;
 
     // Reset path metric pointers
     prevMetric = hammingDistance[0];
     currMetric = hammingDistance[1];
 
-    // Set all prev
+    // Initialize metrics to force zero starting state.
     for(int i = 0; i < STATES; i++) {
         prevMetric[i] = std::numeric_limits<uint32_t>::max() / 2;
         currMetric[i] = 0;
     }
-
+    // This forces the zero starting state.
     prevMetric[0] = 0;
 
     punctureIndex = 0;
-    depunctureIndex = 0;
 }
 

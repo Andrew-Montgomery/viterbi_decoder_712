@@ -56,10 +56,11 @@ class ConvolutionalEncoder712 {
 public:
     ConvolutionalEncoder712();
 
+    // Updating the puncture pattern resets the encoder.
     void SetPuncturePattern(const BitVector &newPattern);
-
+    // Main encode routine. Returns punctured bit vector.
     BitVector Encode(const BitVector &input);
-    // Resets the internal current state to 0
+    // Resets the internal running state of the encoder.
     void Reset();
 
 private:

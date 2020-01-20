@@ -24,20 +24,17 @@
 #include "convolutional_encoder_712.h".h"
 
 // Hard decision Viterbi Decoder for the 7,1,2 [171, 133] polynomial.
-// Uses BitVector class for input/outputs.
 // Puncture pattern and traceback depth can be set by user.
 // Can operate as a continuous or terminated decoder.
 // Continuous decoding will return 'TracebackDepth' 0 bits after a reset.
 // Continuous decoding assumes start state is zero.
 // Terminated decoding assuming first and last state is zero.
 class ViterbiDecoder712H {
-    // Input rate
-    static const uint32_t k = 1;
     // Output rate
-    static const uint32_t n = 2;
+    static const uint32_t N = 2;
     // Constraint size
     static const uint32_t K = 7;
-    // Number of unique states in 7,1,2 encoder
+    // Number of unique states in 7,1,2 encoder (K-1)^2
     static const uint32_t STATES = 64;
 
 public:
@@ -50,10 +47,15 @@ public:
     void SetPuncturePattern(const BitVector &pattern);
     bool HasPuncturePattern() const;
 
+    // Input is encoded and punctured bit vector.
+    // Input length must be multiple of 1's count in puncture pattern.
     // Treat input as continous stream using previous state.
     // Uses last state as start of decode unless Reset is called.
     // Same functionality as 'Continuous' TerminationMethod in MATLAB.
+    // Input size should
     BitVector Decode(const BitVector &input);
+    // Input is encoded and punctured bit vector.
+    // Input length must be multiple of 1's count in puncture pattern.
     // Treat input independently.
     // Same functionality as 'Terminated' mode in MATLAB.
     // Starts with reset, assumes first and last state is zero.
@@ -61,14 +63,13 @@ public:
     // Ends with reset
     BitVector DecodeTerminated(const BitVector &input);
 
-    // Resets/Flushes all variables
+    // Resets decision history and restarts decoder.
     void Reset();
 
 private:
     // Hamming distance between a and b (2 bits) ignoring the bits
     // if the associated bit in p is set to zero.
     uint8_t HD(const uint8_t a[2], const uint8_t b[2], const uint8_t p[2]);
-    BitVector Depuncture(const BitVector &input);
 
     Trellis712 trellis;
     // User supplied puncture pattern
@@ -76,8 +77,6 @@ private:
     // Rolling index through puncture pattern used for marking which bits
     //   to ignore when calculating Hamming Distance
     uint32_t punctureIndex;
-    // Rolling index through puncture pattern used for depuncturing
-    uint32_t depunctureIndex;
     // User specified
     int tracebackDepth;
     // The decision matric.

@@ -37,19 +37,20 @@ Trellis712::Trellis712()
 
 ConvolutionalEncoder712::ConvolutionalEncoder712()
 {
-    puncturePattern = "11";
+    puncturePattern = PuncturePattern712_12;
     currentState = 0;
 }
 
 void ConvolutionalEncoder712::SetPuncturePattern(const BitVector &newPattern)
 {
     if(newPattern.Size() == 0) {
-        puncturePattern = "11";
-        return;
+        puncturePattern = PuncturePattern712_12;
+    } else {
+        assert((newPattern.Size() % 2) == 0);
+        puncturePattern = newPattern;
     }
 
-    assert((newPattern.Size() % 2) == 0);
-    puncturePattern = newPattern;
+    Reset();
 }
 
 BitVector ConvolutionalEncoder712::Encode(const BitVector &input)
