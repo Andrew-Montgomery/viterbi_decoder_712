@@ -16,12 +16,12 @@ int main()
     decoder.SetTracebackDepth(Traceback712_56);
 
     // Create input bit vector
-    int inputBits = 1 << 16;
+    int inputBits = 260 - 8;
     for(int i = 0; i < inputBits; i++) {
         input.PushBack(rand() & 0x1);
     }
     // Force final state to zero
-    for(int i = 0; i < 32; i++) {
+    for(int i = 0; i < 8; i++) {
         input.PushBack(0);
     }
 

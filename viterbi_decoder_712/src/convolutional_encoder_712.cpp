@@ -57,6 +57,7 @@ BitVector ConvolutionalEncoder712::Encode(const BitVector &input)
 {
     assert(input.Size() > 0);
     assert(puncturePattern.Size() > 0);
+    assert(((2 * input.Size()) % puncturePattern.Size()) == 0);
 
     const int encodedLength = 2 * (puncturePattern.Ones() * input.Size()) / puncturePattern.Size();
     BitVector encoded(encodedLength);
