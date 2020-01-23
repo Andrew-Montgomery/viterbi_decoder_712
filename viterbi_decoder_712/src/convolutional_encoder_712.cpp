@@ -1,13 +1,12 @@
 #include "convolutional_encoder_712.h"
 
-static uint64_t countSetBits(uint64_t n)
+static uint64_t Popcount(uint64_t n)
 {
-    // base case
-    if (n == 0) {
-        return 0;
-    } else {
-        return 1 + countSetBits(n & (n - 1));
+    int i = 0;
+    for(; n != 0; n &= n - 1) {
+        i++;
     }
+    return i;
 }
 
 Trellis712::Trellis712()
@@ -24,7 +23,7 @@ Trellis712::Trellis712()
 
             for(int k = 0; k < 2; k++) {
                 uint32_t output = reg & g[k];
-                outputs[i][j][k] = countSetBits(output) & 1;
+                outputs[i][j][k] = Popcount(output) & 1;
             }
 
             // Calculate next state
@@ -64,6 +63,7 @@ BitVector ConvolutionalEncoder712::Encode(const BitVector &input)
 
     // Index into encoded buffer
     int encodedIx = 0;
+    // Index into puncture pattern
     int punctureIx = 0;
 
     for(int i = 0; i < input.Size(); i++) {

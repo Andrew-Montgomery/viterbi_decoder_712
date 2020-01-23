@@ -24,7 +24,7 @@
 #include "convolutional_encoder_712.h".h"
 
 // Hard decision Viterbi Decoder for the 7,1,2 [171, 133] polynomial.
-// Puncture pattern and traceback depth can be set by user.
+// Puncture pattern and traceback depth can be configured.
 // Can operate as a continuous or terminated decoder.
 // Continuous decoding will return 'TracebackDepth' 0 bits after a reset.
 // Continuous decoding assumes start state is zero.
@@ -32,30 +32,29 @@
 class ViterbiDecoder712H {
     // Output rate
     static const uint32_t N = 2;
-    // Constraint size
-    static const uint32_t K = 7;
     // Number of unique states in 7,1,2 encoder (K-1)^2
     static const uint32_t STATES = 64;
 
 public:
     ViterbiDecoder712H();
 
-    // Setting a new traceback depth resets the decode state.
+    // Setting a new traceback depth resets the decoder state.
     void SetTracebackDepth(uint32_t depth);
     uint32_t GetTracebackDepth() const;
-    // Setting a new puncture pattern resets the decode state.
+
+    // Setting a new puncture pattern resets the decoder state.
     void SetPuncturePattern(const BitVector &pattern);
-    bool HasPuncturePattern() const;
+    BitVector GetPuncturePattern() const;
 
     // Input is encoded and punctured bit vector.
-    // Input length must be multiple of 1's count in puncture pattern.
+    // Depunctured input length must be multiple of the puncture pattern length.
     // Treat input as continous stream using previous state.
     // Uses last state as start of decode unless Reset is called.
     // Same functionality as 'Continuous' TerminationMethod in MATLAB.
-    // Input size should
     BitVector Decode(const BitVector &input);
+
     // Input is encoded and punctured bit vector.
-    // Input length must be multiple of 1's count in puncture pattern.
+    // Depunctured input length must be multiple of the puncture pattern length.
     // Treat input independently.
     // Same functionality as 'Terminated' mode in MATLAB.
     // Starts with reset, assumes first and last state is zero.
@@ -74,9 +73,6 @@ private:
     Trellis712 trellis;
     // User supplied puncture pattern
     BitVector puncturePattern;
-    // Rolling index through puncture pattern used for marking which bits
-    //   to ignore when calculating Hamming Distance
-    uint32_t punctureIndex;
     // User specified
     int tracebackDepth;
     // The decision matric.

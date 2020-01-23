@@ -1,7 +1,7 @@
 # viterbi_decoder_712
 Reference implementation of a Viterbi decoder for the convolutional code polynomial 7,1,2 [171 133] commonly used in communications and satellite communications.
 
-* C++ with example usage and QtCreator project file.
+* Written in C++ with example usage and QtCreator project file.
 * Uses BitVector class for inputs/outputs. (Thin wrapper over std::vector<uint8_t>)
 * Hard decisions using Hamming Distance as path metric.
 * Supports arbitrary puncture patterns and traceback depth lengths.

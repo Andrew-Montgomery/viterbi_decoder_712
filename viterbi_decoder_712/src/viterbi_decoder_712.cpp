@@ -55,9 +55,9 @@ void ViterbiDecoder712H::SetPuncturePattern(const BitVector &pattern)
     Reset();
 }
 
-bool ViterbiDecoder712H::HasPuncturePattern() const
+BitVector ViterbiDecoder712H::GetPuncturePattern() const
 {
-    return puncturePattern.Length() > 0;
+    return puncturePattern;
 }
 
 BitVector ViterbiDecoder712H::Decode(const BitVector &input)
@@ -95,6 +95,7 @@ BitVector ViterbiDecoder712H::Decode(const BitVector &input)
 
     // Pointer to depunctured bits
     const uint8_t *s = &depunctured[0];
+    int punctureIndex = 0;
 
     // Go through each trellis column
     for(int i = 0; i < iters; i++) {
@@ -174,6 +175,8 @@ BitVector ViterbiDecoder712H::Decode(const BitVector &input)
         }
     }
 
+    assert(punctureIndex == 0);
+
     return decoded;
 }
 
@@ -234,7 +237,5 @@ void ViterbiDecoder712H::Reset()
     }
     // This forces the zero starting state.
     prevMetric[0] = 0;
-
-    punctureIndex = 0;
 }
 
